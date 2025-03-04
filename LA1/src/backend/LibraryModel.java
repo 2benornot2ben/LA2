@@ -10,6 +10,7 @@ package backend;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class LibraryModel {
 	/* This class allows everything backend-related to happen,
@@ -197,13 +198,29 @@ public class LibraryModel {
 		return list;
 	}
 	
-	public ArrayList<String> getLibraryFavoriteSongs() {
+	public ArrayList<String> getLibraryFavoriteSongs(boolean sort) {
 		/* Returns a duplicate of the library song list, in name form.
 		 * However, ones which are not favorited are excluded. */
+		ArrayList<Song> songListCopy = new ArrayList<Song>(songList);
+		if (sort) {
+			boolean sorted = false;
+			boolean sortAttempt = true;
+			// We will use insertion sort.
+			while (!sorted) {
+				sortAttempt = true;
+				for (int i = 0; i < songListCopy.size() - 1; i++) {
+					if (songListCopy.get(i).getRating() < songListCopy.get(i + 1).getRating()) {
+						Collections.swap(songListCopy, i, i+1);
+						sortAttempt = false;
+					}
+				}
+				sorted = sortAttempt;
+			}
+		}
         ArrayList<String> favoriteSongs = new ArrayList<String>();
-		for (int i = 0; i < this.songList.size(); i++){
-            if (songList.get(i).getFavorited() == true){
-                favoriteSongs.add(songList.get(i).getSongName());
+		for (int i = 0; i < songListCopy.size(); i++){
+            if (songListCopy.get(i).getFavorited() == true || sort){
+                favoriteSongs.add(songListCopy.get(i).getSongName());
             }
         }
         return favoriteSongs;

@@ -10,6 +10,7 @@ package frontend;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 import backend.*;
@@ -103,33 +104,38 @@ public class View {
 			} else if (holdInputLower.split(" ")[0].equals("get")) {
 				System.out.println("");
 				System.out.println("YOU CAN GET A LIST OF ...");
-				System.out.println("1. Song titles");
-				System.out.println("2. Artists");
+				System.out.println("1. Song titles (s)");
+				System.out.println("2. Artists (s)");
 				System.out.println("3. Albums");
 				System.out.println("4. Playlists");
-				System.out.println("5. Favorite Songs");
+				System.out.println("5. Favorite Songs (s) (Sorting it here will print out ALL songs sorted by rating)");
+				System.out.println("Type \"(num) s\" if you want it sorted (must have a \"(s)\" symbol in the list)");
 				System.out.print("Enter the number of an option you want: ");
 				String option = getInput.nextLine();
 				System.out.println("");
 				// Handling the 5 numbers the users could've input, sadly one at a time.
-				if(option.equals("1")) {
+				if (option.split(" ")[0].equals("1")) {
 					ArrayList<String> songNames = myLibrary.getLibrarySongList();
+					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) Collections.sort(songNames);
 					if(songNames.size() == 0) System.out.println("No songs in the library");
 					else getPrintText(songNames);
-				} else if(option.equals("2")) {
+				} else if (option.split(" ")[0].equals("2")) {
 					ArrayList<String> artists = myLibrary.getLibraryArtistList();
+					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) Collections.sort(artists);
 					if(artists.size() == 0) System.out.println("No artists in the library");
 					else getPrintText(artists);
-				} else if(option.equals("3")) {
+				} else if (option.equals("3")) {
 					ArrayList<String> albums = myLibrary.getLibraryAlbumList();
 					if (albums.size() == 0) System.out.println("No albums in the library");
 					else getPrintText(albums);
-				} else if(option.equals("4")) {
+				} else if (option.equals("4")) {
 					ArrayList<String> playLists = myLibrary.getLibraryPlayListList();
 					if(playLists.size() == 0) System.out.println("No playlists in the library");
 					else getPrintText(playLists);
-				} else if(option.equals("5")) {
-					ArrayList<String> favorite = myLibrary.getLibraryFavoriteSongs();
+				} else if (option.split(" ")[0].equals("5")) {
+					boolean sort = false;
+					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) sort = true;
+					ArrayList<String> favorite = myLibrary.getLibraryFavoriteSongs(sort);
 					if(favorite.size() == 0) System.out.println("No favorite songs in the library");
 					else getPrintText(favorite);
 				} else {
@@ -137,9 +143,8 @@ public class View {
 				}
 				
 			// This handles CREATING PLAYLISTS. This doesn't need any more info past what you initially give it.
-			} else if (holdInputLower.split(" ")[0].equals("create") && holdInputLower.length() > 7
-					&& !(holdInputLower.substring(7).contains(" "))) {
-				String name = holdInputLower.split(" ")[1];
+			} else if (holdInputLower.split(" ")[0].equals("create") && holdInputLower.length() > 7) {
+				String name = holdInputLower.split(" ", 2)[1];
 				boolean added = myLibrary.addPlayList(name);
 				System.out.println("");
 				// added is a variable used a lot later on, and it's as the name implies: A boolean that says if

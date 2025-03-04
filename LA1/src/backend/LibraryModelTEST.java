@@ -100,11 +100,11 @@ public class LibraryModelTEST {
         Song song2 = new Song("2", "2", "2", "2", "2");
         libraryModel.addSongToList(song1);
         libraryModel.rateSong(song1, 5);
-        assertTrue(libraryModel.getLibraryFavoriteSongs().contains("1"));
+        assertTrue(libraryModel.getLibraryFavoriteSongs(false).contains("1"));
         libraryModel.rateSong(song1, 3);
-        assertFalse(libraryModel.getLibraryFavoriteSongs().contains("1"));
+        assertFalse(libraryModel.getLibraryFavoriteSongs(false).contains("1"));
         libraryModel.rateSong(song2, 4);
-        assertFalse(libraryModel.getLibraryFavoriteSongs().contains("2"));
+        assertFalse(libraryModel.getLibraryFavoriteSongs(false).contains("2"));
     }
 
     @Test
