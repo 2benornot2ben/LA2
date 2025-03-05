@@ -148,6 +148,20 @@ public class LibraryModel {
 		if (!artistList.contains(song.getArtist())){
 			artistList.add(song.getArtist());
 		}
+		
+		// We need the album now, too!
+		Album albumCheck = new Album(song.getAlbumName(), song.getArtist(), song.getArtist(), song.getYear());
+		boolean contains = false;
+		for (Album album : albumList) {
+			if (album.equals(albumCheck)) {
+				contains = true;
+				album.addSong(song);
+			}
+		}
+		if (!contains) {
+			albumCheck.addSong(song);
+			albumList.add(albumCheck);
+		}
     }
 	
 	public void addAlbumToList(Album album) {
@@ -274,13 +288,17 @@ public class LibraryModel {
     	for(int i = 0; i < songs.size(); i++) {
     		// precise means "must be the same name", as opposed to "must have the given words somewhere"
 			if (precise) {
-				// indicator is either title or artist
+				// indicator is either title, artist, or genre.
 				if (indicator.equals("title")) {
 					if (songs.get(i).getSongName().toLowerCase().equals(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
-				} else {
+				} else if (indicator.equals("artist")) {
 					if (songs.get(i).getArtist().toLowerCase().equals(input.toLowerCase())) {
+						resultList.add(songs.get(i));
+					}
+				} else {
+					if (songs.get(i).getGenre().toLowerCase().equals(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
 				}
@@ -290,8 +308,13 @@ public class LibraryModel {
 					if (songs.get(i).getSongName().toLowerCase().contains(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
-				} else {
+				} else if (indicator.equals("artist")) {
 					if (songs.get(i).getArtist().toLowerCase().contains(input.toLowerCase())) {
+						resultList.add(songs.get(i));
+					}
+				} else {
+					// Incase you wanteed to search genres broadly, which like... Okay, sure.
+					if (songs.get(i).getGenre().toLowerCase().contains(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
 				}

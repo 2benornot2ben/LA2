@@ -38,7 +38,15 @@ public class Album {
 	
 	protected void addSong(Song songInst) {
 		/* Adds a song via copying it. */
-		songs.add(new Song(songInst));
+		boolean exists = false;
+		for (Song song : songs) {
+			if (song.equals(songInst)) {
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) songs.add(new Song(songInst));
+		// SHOULD PROBABLY RETURN SOMETHING SAYING IT FAILED. --------------------------------------------------------------------------
 	}
 	
 	public String getPrintFormatted() {
@@ -71,5 +79,21 @@ public class Album {
 	        copy.add(new Song(song));
 	    }
 	    return copy;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		/* Compares 2 song objects. Returns true if
+		 * they are the same, either in pointer or in
+		 * all relevant details (a few are omitted to
+		 * prevent strange errors) */
+	    if (this == obj) return true;
+	    if (obj == null || getClass() != obj.getClass()) return false;
+	    Album album = (Album) obj;
+	    // This does NOT check the list of songs.
+	    return albumName.equals(album.albumName) &&
+	           artist.equals(album.artist) &&
+	           genre.equals(album.genre) &&
+	           year.equals(album.year);
 	}
 }
