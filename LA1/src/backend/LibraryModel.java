@@ -126,6 +126,60 @@ public class LibraryModel {
 		return true;
 	}
 	
+	public boolean canRemoveSong(String title, String artist) {
+		/* This method checks if you CAN remove a song from the library; it doesn't do anything else. */
+		for (int i = 0; i < songList.size(); i++) {
+			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+				// We found it in there! So, true
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean canRemoveAlbum(String title, String artist) {
+		/* This method checks if you CAN remove a song from the library; it doesn't do anything else. */
+		for (int i = 0; i < albumList.size(); i++) {
+			if (albumList.get(i).getAlbumName().toLowerCase().equals(title.toLowerCase()) && albumList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+				// We found it in there! So, true
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	public void removeSong(String title, String artist) {
+		for (int i = 0; i < songList.size(); i++) {
+			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+				String album = songList.get(i).getAlbumName();
+				songList.remove(i);
+				for (int j = 0; j < albumList.size(); j++) {
+					if (albumList.get(j).getAlbumName().toLowerCase().equals(album.toLowerCase()) && albumList.get(j).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+						albumList.get(j).removeSong(title, artist);
+						if(albumList.get(j).getSongList().size() == 0) {
+							removeAlbum(album, artist);
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	
+	public void removeAlbum(String title, String artist) {
+		for (int i = 0; i < albumList.size(); i++) {
+			if (albumList.get(i).getAlbumName().toLowerCase().equals(title.toLowerCase()) && albumList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+				for(int j = 0; j < songList.size(); j++) {
+					if(songList.get(j).getAlbumName().equals(albumList.get(i).getAlbumName())) {
+						songList.remove(j);
+					}
+				}
+				albumList.remove(i);
+			}
+		}
+	}
+	
 	public boolean canAddAlbumToList(Album album) {
 		/* This method checks if you CAN add an album to a list; it doesn't do anything else. */
 		for (int i = 0; i < albumList.size(); i++) {
@@ -147,6 +201,20 @@ public class LibraryModel {
 		// Artist might already be in there
 		if (!artistList.contains(song.getArtist())){
 			artistList.add(song.getArtist());
+		}
+		
+		// We need the album now, too!
+		Album albumCheck = new Album(song.getAlbumName(), song.getArtist(), song.getArtist(), song.getYear());
+		boolean contains = false;
+		for (Album album : albumList) {
+			if (album.equals(albumCheck)) {
+				contains = true;
+				album.addSong(song);
+			}
+		}
+		if (!contains) {
+			albumCheck.addSong(song);
+			albumList.add(albumCheck);
 		}
     }
 	
@@ -209,7 +277,7 @@ public class LibraryModel {
 			while (!sorted) {
 				sortAttempt = true;
 				for (int i = 0; i < songListCopy.size() - 1; i++) {
-					if (songListCopy.get(i).getRating() < songListCopy.get(i + 1).getRating()) {
+					if (songListCopy.get(i).getRating() > songListCopy.get(i + 1).getRating()) {
 						Collections.swap(songListCopy, i, i+1);
 						sortAttempt = false;
 					}
@@ -274,13 +342,17 @@ public class LibraryModel {
     	for(int i = 0; i < songs.size(); i++) {
     		// precise means "must be the same name", as opposed to "must have the given words somewhere"
 			if (precise) {
-				// indicator is either title or artist
+				// indicator is either title, artist, or genre.
 				if (indicator.equals("title")) {
 					if (songs.get(i).getSongName().toLowerCase().equals(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
-				} else {
+				} else if (indicator.equals("artist")) {
 					if (songs.get(i).getArtist().toLowerCase().equals(input.toLowerCase())) {
+						resultList.add(songs.get(i));
+					}
+				} else {
+					if (songs.get(i).getGenre().toLowerCase().equals(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
 				}
@@ -290,8 +362,13 @@ public class LibraryModel {
 					if (songs.get(i).getSongName().toLowerCase().contains(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
-				} else {
+				} else if (indicator.equals("artist")) {
 					if (songs.get(i).getArtist().toLowerCase().contains(input.toLowerCase())) {
+						resultList.add(songs.get(i));
+					}
+				} else {
+					// Incase you wanteed to search genres broadly, which like... Okay, sure.
+					if (songs.get(i).getGenre().toLowerCase().contains(input.toLowerCase())) {
 						resultList.add(songs.get(i));
 					}
 				}
