@@ -462,7 +462,7 @@ public class LibraryModel {
     return resultList;
     }
     
-    public String getUsername() {
-    	return this.username;
+    public boolean checkIfCorrectUsername(String username) {
+    	return (this.username.equals(username));
     }
 }

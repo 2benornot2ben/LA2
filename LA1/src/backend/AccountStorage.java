@@ -13,13 +13,14 @@ public class AccountStorage {
 	public AccountStorage() {
 		accountLibraries = new ArrayList<LibraryModel>();
 	}
+	
 	public boolean canCreateAUser(String user) throws FileNotFoundException{
 		File myFile = new File("users.txt");
 		Scanner myReader = new Scanner(myFile);
 		while(myReader.hasNextLine()) {
 			String line = myReader.nextLine();
 			String username = line.split(" ")[0];
-			if(username.equals(user.toLowerCase())) {
+			if(username.equals(user)) {
 				myReader.close();
 				return false;
 			}
@@ -30,9 +31,9 @@ public class AccountStorage {
 	public void createAUser(String user, String passport) {
 		try {
 			FileWriter myWriter = new FileWriter("users.txt");
-			myWriter.write(user.toLowerCase() + " " + passport);
+			myWriter.write(user + " " + passport);
 			myWriter.close();
-			LibraryModel newLibrary = new LibraryModel(user.toLowerCase());
+			LibraryModel newLibrary = new LibraryModel(user);
 			accountLibraries.add(newLibrary);
 			System.out.println("User successfully created.");
 		} catch (IOException e) {
@@ -47,7 +48,7 @@ public class AccountStorage {
 			String line = myReader.nextLine();
 			String username = line.split(" ")[0];
 			String pass = line.split(" ")[1];
-			if(username.equals(user.toLowerCase())) {
+			if(username.equals(user)) {
 				if(pass.equals(passport)) {
 					myReader.close();
 					return true;
@@ -58,11 +59,14 @@ public class AccountStorage {
 		return false;
 	}
 	
-	public void openLibrary(String user) throws FileNotFoundException{
+	public void openLibrary(String user, String passport) throws FileNotFoundException{
 		for(int i = 0; i < accountLibraries.size(); i++) {
-			System.out.println(accountLibraries.get(i).getUsername());
-			if(accountLibraries.get(i).getUsername().equals(user.toLowerCase())) {
-				View newView = new View(accountLibraries.get(i));
+			//System.out.println(accountLibraries.get(i).getUsername());
+			// If you want a welcome message, make it part of librarymodel.
+			if (canLogIn(user, passport)) {
+				if(accountLibraries.get(i).checkIfCorrectUsername(user)) {
+					View newView = new View(accountLibraries.get(i));
+				}
 			}
 		}
 	}
