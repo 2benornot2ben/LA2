@@ -18,6 +18,7 @@ public class Song {
     private String year;
 	private int rating;
 	private boolean favorited;
+	private int playCount;
 	
 	public Song(String songName, String artist, String albumName, String genre, String year) {
 		/* Initializes everything to a song's specifications.
@@ -39,6 +40,7 @@ public class Song {
         this.year = incomingSong.getYear();
         this.favorited = incomingSong.getFavorited();
         this.rating = incomingSong.getRating();
+        this.playCount = incomingSong.getPlayCount();
 	}
 	
 	public String getPrintFormatted() {
@@ -73,6 +75,10 @@ public class Song {
 	
 	public boolean getFavorited() {
 		return favorited;
+	}
+	
+	public int getPlayCount() {
+		return playCount;
 	}
 	
 	public void setRating(int n) {

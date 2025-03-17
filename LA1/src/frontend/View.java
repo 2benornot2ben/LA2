@@ -635,7 +635,7 @@ public class View {
 			}
 		}
 		// We don't need to know if it exists to try.
-		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);
+		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);	
 		if (exist) {
 			if (removed) System.out.println(title + " by " + artist + " has been removed from " + playListName);
 			else System.out.println(title + " by " + artist + " is not in " + playListName); // Else for it not being there

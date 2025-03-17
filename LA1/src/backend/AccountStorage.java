@@ -20,7 +20,7 @@ public class AccountStorage {
 		while(myReader.hasNextLine()) {
 			String line = myReader.nextLine();
 			String username = line.split(" ")[0];
-			if(username.equals(user)) {
+			if(username.equals(user.toLowerCase())) {
 				myReader.close();
 				return false;
 			}
@@ -31,7 +31,7 @@ public class AccountStorage {
 	public void createAUser(String user, String passport) {
 		try {
 			FileWriter myWriter = new FileWriter("users.txt");
-			myWriter.write(user + " " + passport);
+			myWriter.write(user.toLowerCase() + " " + passport);
 			myWriter.close();
 			LibraryModel newLibrary = new LibraryModel(user);
 			accountLibraries.add(newLibrary);
@@ -48,7 +48,7 @@ public class AccountStorage {
 			String line = myReader.nextLine();
 			String username = line.split(" ")[0];
 			String pass = line.split(" ")[1];
-			if(username.equals(user)) {
+			if(username.equals(user.toLowerCase())) {
 				if(pass.equals(passport)) {
 					myReader.close();
 					return true;
@@ -62,7 +62,7 @@ public class AccountStorage {
 	public void openLibrary(String user, String passport) throws FileNotFoundException{
 		for(int i = 0; i < accountLibraries.size(); i++) {
 			//System.out.println(accountLibraries.get(i).getUsername());
-			// If you want a welcome message, make it part of librarymodel.
+			// If you want a welcome message, make it part of view.
 			if (canLogIn(user, passport)) {
 				if(accountLibraries.get(i).checkIfCorrectUsername(user)) {
 					View newView = new View(accountLibraries.get(i));

@@ -24,9 +24,9 @@ public class Main {
 			String option = getInput.nextLine();
 			if(option.split(" ")[0].equals("1")) {
 				System.out.println("You are about to create a new account.");
-				System.out.println("(Case Sensitive!)");
 				System.out.print("Enter a username: ");
 				String username = getInput.nextLine();
+				System.out.println("(Case Sensitive!)");
 				System.out.print("Enter a passport: ");
 				String passport = getInput.nextLine();
 				if(storage.canCreateAUser(username)) {
@@ -41,6 +41,7 @@ public class Main {
 				System.out.println("You are about to log into an account.");
 				System.out.print("Enter a username: ");
 				String username = getInput.nextLine();
+				System.out.println("(Case Sensitive!)");
 				System.out.print("Enter a passport: ");
 				String passport = getInput.nextLine();
 				if(storage.canLogIn(username, passport)) {

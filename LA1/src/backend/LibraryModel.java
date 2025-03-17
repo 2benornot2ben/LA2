@@ -29,7 +29,12 @@ public class LibraryModel {
 		this.playListList = new ArrayList<PlayList>();
 		this.artistList = new ArrayList<String>();
 		this.database = new MusicStore();
-		this.username = username;
+		this.username = username.toLowerCase();
+		
+		playListList.add(new PlayList("favorites", "favorite"));
+		playListList.add(new PlayList("top rated", "topRated"));
+		playListList.add(new PlayList("recent", "recent"));
+		playListList.add(new PlayList("most played", "mostPlayed"));
 	}
 	
 	public ArrayList<Song> searchByIndicatorSong(String input, String category, String indicator, boolean precise) {
@@ -74,7 +79,7 @@ public class LibraryModel {
 		/* Searches for playlists based on just it's name.
 		 * No extra inputs here, it's all we need it for:
 		 * Note that it only returns ones which are equal. */
-		PlayList result = new PlayList("");
+		PlayList result = new PlayList("",  "");
 		for (int i = 0; i < playListList.size(); i++) {
 			if (playListList.get(i).getPlayListName().toLowerCase().equals(name.toLowerCase())) {
 				// No duplicates, so we can just break out immediately.
@@ -100,7 +105,7 @@ public class LibraryModel {
 		for (int i = 0; i < playListList.size(); i++) {
 			if (playListList.get(i).getPlayListName().toLowerCase().equals(playlistName.toLowerCase())) {
 				// If we've found it, then we can stop iterating. Both results from here end the program.
-				if (playListList.get(i).canAddSongToList(song)) {
+				if (playListList.get(i).canAddSongToList(song) && playListList.get(i).isUserMade()) {
 					playListList.get(i).addSong(song);
 					return true; // ("Success")
 				}
@@ -116,7 +121,7 @@ public class LibraryModel {
 		/* Adds a song to a playlist, using an song's name an artist. */
 		for (int i = 0; i < playListList.size(); i ++) {
 			if (playListList.get(i).getPlayListName().toLowerCase().equals(playlistName.toLowerCase())) {
-				if(playListList.get(i).canRemoveSong(title, artist)) {
+				if(playListList.get(i).canRemoveSong(title, artist) && playListList.get(i).isUserMade()) {
 					// If we removed a song, no reason to remove 2; we're done.
 					playListList.get(i).removeSong(title, artist);
 					return true; // ("Success")
@@ -164,10 +169,10 @@ public class LibraryModel {
 		for (int i = 0; i < songList.size(); i++) {
 			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				String album = songList.get(i).getAlbumName();
+				Song songSave = songList.get(i);
 				songList.remove(i);
-				for(int j = 0; j < playListList.size(); j++) {
-					boolean temp = removeSongFromPlaylist(playListList.get(i).getPlayListName(), title, artist);
-				}
+				runSpecialFunctions(songSave, false);
+				removeSongFromPlaylistSpecial(title, artist);
 				for (int j = 0; j < albumList.size(); j++) {
 					if (albumList.get(j).getAlbumName().toLowerCase().equals(album.toLowerCase()) && albumList.get(j).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 						albumList.get(j).removeSong(title, artist);
@@ -176,7 +181,6 @@ public class LibraryModel {
 						}
 					}
 				}
-				
 			}
 		}
 		removeArtist();
@@ -190,7 +194,9 @@ public class LibraryModel {
 						for(int k = 0; k < playListList.size(); k++) {
 							boolean temp = removeSongFromPlaylist(playListList.get(k).getPlayListName(), songList.get(j).getSongName(), artist);
 						}
+						Song songSave = songList.get(i);
 						songList.remove(j);
+						runSpecialFunctions(songSave, false);
 					}
 				}
 				albumList.remove(i);
@@ -238,6 +244,7 @@ public class LibraryModel {
 		// without this check if it somehow did.
 		if (!songList.contains(song)) {
 			songList.add(new Song(song));
+			runSpecialFunctions(song, true);
 		}
 		// Artist might already be in there
 		if (!artistList.contains(song.getArtist())){
@@ -265,6 +272,8 @@ public class LibraryModel {
 			if(albumList.get(i).getAlbumName().equals(album.getAlbumName()) && albumList.get(i).getArtist().equals(album.getArtist())) {
 				for(int j = 0; j < album.getSongList().size(); j++) {
 					albumList.get(i).addSong(album.getSongList().get(j));
+					// runSpecialFunctions(album.getSongList().get(j));
+					// May not be necessary.
 				}
 			} else {
 				albumList.add(new Album(album));
@@ -277,6 +286,7 @@ public class LibraryModel {
 		for(int i = 0; i < album.getSongList().size(); i++) {
 			if(!songs.contains(album.getSongList().get(i).getSongName())) {
 				songList.add(album.getSongList().get(i));
+				runSpecialFunctions(songList.get(songList.size() - 1), true);
 			}
 		}
 		
@@ -356,18 +366,18 @@ public class LibraryModel {
 			}
 		}
 		// Add it.
-		playListList.add(new PlayList(name));
+		playListList.add(new PlayList(name, ""));
 		return true; // ("Success")
 	}
 	
 	public boolean markSongAsFavorite(Song songInst) {
-		/* Marks a internal song as favorite, by finding its match
-		 * to the given song. */
+		/* Marks a internal song as favorite, by finding its match */
         for (int i = 0; i < songList.size(); i++) {
             if (songList.get(i).equals(songInst)) {
             	// At this point we've found it, so either branch will end the loop.
                 if (!songList.get(i).getFavorited()) {
                     songList.get(i).favorite();
+                    runSpecialFunctions(songList.get(i), true);
                     return true; // ("Success")
                 } else return false;
             }
@@ -383,6 +393,7 @@ public class LibraryModel {
         		songList.get(i).setRating(rating);
         		if (rating == 5) songList.get(i).favorite(); // Spec
                 else songList.get(i).unfavorite();
+        		runSpecialFunctions(songList.get(i), true);
         	}
         }
     }
@@ -463,6 +474,76 @@ public class LibraryModel {
     }
     
     public boolean checkIfCorrectUsername(String username) {
-    	return (this.username.equals(username));
+    	return (this.username.equals(username.toLowerCase()));
+    }
+    
+    private boolean addPlayListSpecial(String name, String special) {
+		/* Adds a new playlist to the library, with a given name.
+		 * Exactly the same as the normal one, except it accepts
+		 * a new "special" line. */
+		for (int i = 0; i < playListList.size(); i++) {
+			if (playListList.get(i).getPlayListName().toLowerCase().equals(name.toLowerCase())) {
+				// Make sure it doesn't already exist
+				return false;
+			}
+		}
+		// Add it.
+		playListList.add(new PlayList(name, special));
+		// Now, we've missed a bunch of songs, so we need to add them.
+		for (int i = 0; i < songList.size(); i++) {
+			playListList.get(playListList.size() - 1).runSpecialModifier(songList.get(i), 0);
+		}
+		return true; // ("Success")
+	}
+    
+    private void removePlayListSpecial(String name) {
+		/* Removes a playlist from the library. Has no
+		 * restrictions. */
+		for (int i = 0; i < playListList.size(); i++) {
+			if (playListList.get(i).getPlayListName().toLowerCase().equals(name.toLowerCase())) {
+				playListList.remove(i);
+				break;
+			}
+		}
+	}
+    
+    private void removeSongFromPlaylistSpecial(String title, String artist) {
+		/* Removes a song from all playlists. No exceptions. */
+		for (int i = 0; i < playListList.size(); i ++) {
+			if (playListList.get(i).canRemoveSong(title, artist)) {
+				// If we removed a song, keep going! There's probably more!
+				playListList.get(i).removeSong(title, artist);
+			}
+		}
+	}
+    
+    private void runSpecialFunctions(Song song, boolean exists) {
+    	// To avoid mapping issues, i'm doing it this way.
+    	// This must be ran every time a SONG is removed. If an album is removed, it must be ran a lot.
+    	// Also, "exists" is basically just a way to fix up the genres w/o adding it again
+    	// after removal.
+    	ArrayList<String> triedGenres = new ArrayList<String>();
+    	int counter = 0;
+    	for (int i = 0; i < songList.size(); i++) {
+    		counter = 0;
+    		if (!triedGenres.contains(songList.get(i).getGenre())) {
+    			triedGenres.add(songList.get(i).getGenre());
+    			for (int j = i; j < songList.size(); j++) {
+    				if (songList.get(i).getGenre().equals(triedGenres.get(triedGenres.size() - 1))) {
+    					counter++;
+    				}
+    			}
+    			if (counter >= 10) {
+    				addPlayListSpecial(triedGenres.get(triedGenres.size() - 1), triedGenres.get(triedGenres.size() - 1));
+    			} else {
+    				removePlayListSpecial(triedGenres.get(triedGenres.size() - 1));
+    			}
+    		}
+    	}
+    	if (exists) {
+	    	for (int i = 0; i < playListList.size(); i++) {
+	    		playListList.get(i).runSpecialModifier(song, 0);
+	    	}
+    	}
     }
 }
