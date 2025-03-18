@@ -24,12 +24,12 @@ public class View {
 	Scanner getInput = new Scanner(System.in);
 	String holdInput = "";
 	String holdInputLower = "";
-	public View() throws FileNotFoundException{
+	public View(LibraryModel myLibrary) throws FileNotFoundException{
 		/* This function lets the user interact with the back end
 		 * and preform all of it's functions simply by typing
 		 * commands into the console in their respective orders. */
-		myLibrary = new LibraryModel();
 		boolean running = true;
+		this.myLibrary = myLibrary;
 		while (running) {
 			// Basically, print this small line of text when the program cycles, UNLESS it was by immediate error / first beginning.
 			if (minimize) {
@@ -174,7 +174,7 @@ public class View {
 					else getPrintText(favorite);
 				} else if (option.split(" ")[0].equals("6")){
 					ArrayList<String> songs = myLibrary.getLibraryFavoriteSongs(true);
-					if(songs.size() == 0) System.out.println("No favorite songs in the library");
+					if(songs.size() == 0) System.out.println("No rated songs in the library");
 					else getPrintText(songs);
 			    }else {
 					System.out.println("Wrong input");
@@ -340,12 +340,7 @@ public class View {
         }
         return numeric;
 	}
-	
-	public static void main(String[] args) throws FileNotFoundException{
-		/* This function starts the program. That's it. */
-		new View();
-	}
-	
+
 	private void printAdditionText(boolean added, boolean exists, String title, String artist) {
 		/* This function is used to print out if something
 		 * was added to the library, if it was already in
@@ -412,7 +407,7 @@ public class View {
 		if (isNumeric(getNum)) {
 			int indexPos = Integer.parseInt(getNum) - 1;
 			Song holdWant = resultList.get(indexPos);
-			ArrayList<Album> secondaryResultList = myLibrary.searchByIndicatorAlbum(holdWant.getAlbumName(), "library", "title", true);
+			ArrayList<Album> secondaryResultList = myLibrary.searchByIndicatorAlbum(holdWant.getAlbumName(), "musicstore", "title", true);
 			if (secondaryResultList.size() == 0) {
 				System.out.println("Sorry " + holdInput + " is not in the " + locationHolder + ".");
 			} else {
@@ -426,7 +421,13 @@ public class View {
 					}
 					System.out.println("");
 				}
+				if(myLibrary.checkAlbum(secondaryResultList.get(0).getAlbumName(), secondaryResultList.get(0).getArtist())) {
+					System.out.println("An album " + secondaryResultList.get(0).getAlbumName() + " is in library.");
+				} else {
+					System.out.println("An album " + secondaryResultList.get(0).getAlbumName() + " is not in library.");
+				}
 			}
+			
 		} else {
 			// This functions like minimize's role, so no reason to have it.
 			minimize = false;
@@ -525,7 +526,7 @@ public class View {
 					if (myLibrary.canAddSongToList(songs.get(i))) {
 						// And if we get here, then we're done.
 						myLibrary.addSongToList(songs.get(i));
-						added = true; // Why not set exists? Because added basically acts like it.
+						added = true; // Why not set exists? Because added basiadcally acts like it.
 						break;
 					} else {
 						exists = true;
@@ -550,7 +551,7 @@ public class View {
 			for(int i = 0; i < albums.size(); i++) {
 				if(albums.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 					// If we got here, then it certainly exists.
-					if(myLibrary.canAddAlbumToList(albums.get(i))) {
+					if(myLibrary.canAddAlbumToList(albums.get(i), albums.get(i).getSongList().size())) {
 						// And if we get here, then we're done.
 						myLibrary.addAlbumToList(albums.get(i));
 						added = true; // Why not set exists? Because added basically acts like it.
@@ -634,7 +635,7 @@ public class View {
 			}
 		}
 		// We don't need to know if it exists to try.
-		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);
+		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);	
 		if (exist) {
 			if (removed) System.out.println(title + " by " + artist + " has been removed from " + playListName);
 			else System.out.println(title + " by " + artist + " is not in " + playListName); // Else for it not being there
