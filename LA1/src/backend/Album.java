@@ -104,4 +104,9 @@ public class Album {
 	           genre.equals(album.genre) &&
 	           year.equals(album.year);
 	}
+	
+	@Override
+	public int hashCode() {
+	    return albumName.hashCode() + artist.hashCode() + genre.hashCode() + year.hashCode();
+	}
 }

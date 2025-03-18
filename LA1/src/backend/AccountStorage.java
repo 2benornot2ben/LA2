@@ -38,18 +38,20 @@ public class AccountStorage {
 		myReader.close();
 		return true;
 	}
-	public void createAUser(String user, String password) {
-		try {
-			FileWriter myWriter = new FileWriter("users.txt", true);
-			String hash = hashPassword(password);
-			myWriter.write(user.toLowerCase() + " " + hash + "\n");
-			myWriter.close();
-			LibraryModel newLibrary = new LibraryModel(user);
-			accountLibraries.add(newLibrary);
-			System.out.println("User successfully created.");
-		} catch (IOException e) {
-			System.out.println("An error occurred.");
-		    e.printStackTrace();
+	public void createAUser(String user, String password) throws FileNotFoundException {
+		if (canCreateAUser(user)) {
+			try {
+				FileWriter myWriter = new FileWriter("users.txt", true);
+				String hash = hashPassword(password);
+				myWriter.write(user.toLowerCase() + " " + hash + "\n");
+				myWriter.close();
+				LibraryModel newLibrary = new LibraryModel(user);
+				accountLibraries.add(newLibrary);
+				System.out.println("User successfully created.");
+			} catch (IOException e) {
+				System.out.println("An error occurred.");
+			    e.printStackTrace();
+			}
 		}
 	}
 	public boolean canLogIn(String user, String password) throws FileNotFoundException{

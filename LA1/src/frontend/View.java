@@ -310,6 +310,27 @@ public class View {
 			        }
 				}
 			// This EXITS the program. This one's probably self explanitory.
+			} else if (holdInputLower.split(" ")[0].equals("shuffle")) {
+				System.out.println("");
+				System.out.println("Which do you want to shuffle?");
+				System.out.println("1. Library");
+				System.out.println("2. Playlist");
+				System.out.print("Choose an option you want: ");
+				String option = getInput.nextLine();
+				System.out.println("");
+				if (option.equals("1")) {
+					System.out.println("Library shuffled");
+					myLibrary.shuffleLibrary();
+				} else if (option.equals("2")) {
+					System.out.println("Enter playlist name");
+					String name = getInput.nextLine();
+					boolean worked = myLibrary.shufflePlayList(name);
+					if (worked) {
+						System.out.println("Playlist shuffled successfully");
+					} else {
+						System.out.println("Shuffle failed");
+					}
+				}
 			} else if (holdInputLower.split(" ")[0].equals("exit")) {
 				// Kills the program
 				running = false;

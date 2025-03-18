@@ -154,7 +154,7 @@ public class LibraryModel {
 	}
 	
 	public boolean canRemoveAlbum(String title, String artist) {
-		/* This method checks if you CAN remove a song from the library; it doesn't do anything else. */
+		/* This method checks if you CAN remove a album from the library; it doesn't do anything else. */
 		for (int i = 0; i < albumList.size(); i++) {
 			if (albumList.get(i).getAlbumName().toLowerCase().equals(title.toLowerCase()) && albumList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				// We found it in there! So, true
@@ -183,7 +183,7 @@ public class LibraryModel {
 				}
 			}
 		}
-		removeArtist();
+		removeUnusedArtists();
 	}
 	
 	public void removeAlbum(String title, String artist) {
@@ -202,26 +202,7 @@ public class LibraryModel {
 				albumList.remove(i);
 			}
 		}
-		removeArtist();
-	}
-	
-	private void removeArtist() {
-		ArrayList<String> artists = new ArrayList<String>();
-		for(int i = 0; i < songList.size(); i++) {
-			if(!artists.contains(songList.get(i).getArtist())) {
-				artists.add(songList.get(i).getArtist());
-			}
-		}
-		for(int i = 0; i < albumList.size(); i++) {
-			if(!artists.contains(albumList.get(i).getArtist())) {
-				artists.add(albumList.get(i).getArtist());
-			}
-		}
-		for(int i = artistList.size()-1; i > -1; i--) {
-			if(!artists.contains(artistList.get(i))) {
-				artistList.remove(i);
-			}
-		}
+		removeUnusedArtists();
 	}
 	
 	public boolean canAddAlbumToList(Album album, int songNumber) {
@@ -398,6 +379,25 @@ public class LibraryModel {
         }
     }
     
+    public boolean checkIfCorrectUsername(String username) {
+    	return (this.username.equals(username.toLowerCase()));
+    }
+    
+    public void shuffleLibrary() {
+    	Collections.shuffle(songList);
+    }
+    
+    public boolean shufflePlayList(String name) {
+		for (int i = 0; i < playListList.size(); i++) {
+			if (playListList.get(i).getPlayListName().toLowerCase().equals(name.toLowerCase()) && playListList.get(i).isUserMade()) {
+				// No duplicates, so we can just break out immediately.
+				playListList.get(i).songShuffle();
+				return true;
+			}
+		}
+		return false;
+    }
+    
     // Internal functions
     
     private ArrayList<Song> indicatorSongAdder(String input, String indicator, boolean precise, ArrayList<Song> songs) {
@@ -473,10 +473,6 @@ public class LibraryModel {
     return resultList;
     }
     
-    public boolean checkIfCorrectUsername(String username) {
-    	return (this.username.equals(username.toLowerCase()));
-    }
-    
     private boolean addPlayListSpecial(String name, String special) {
 		/* Adds a new playlist to the library, with a given name.
 		 * Exactly the same as the normal one, except it accepts
@@ -517,6 +513,25 @@ public class LibraryModel {
 		}
 	}
     
+    private void removeUnusedArtists() {
+		ArrayList<String> artists = new ArrayList<String>();
+		for(int i = 0; i < songList.size(); i++) {
+			if(!artists.contains(songList.get(i).getArtist())) {
+				artists.add(songList.get(i).getArtist());
+			}
+		}
+		for(int i = 0; i < albumList.size(); i++) {
+			if(!artists.contains(albumList.get(i).getArtist())) {
+				artists.add(albumList.get(i).getArtist());
+			}
+		}
+		for(int i = artistList.size()-1; i > -1; i--) {
+			if(!artists.contains(artistList.get(i))) {
+				artistList.remove(i);
+			}
+		}
+	}
+    
     private void runSpecialFunctions(Song song, boolean exists) {
     	// To avoid mapping issues, i'm doing it this way.
     	// This must be ran every time a SONG is removed. If an album is removed, it must be ran a lot.
@@ -534,9 +549,9 @@ public class LibraryModel {
     				}
     			}
     			if (counter >= 10) {
-    				addPlayListSpecial(triedGenres.get(triedGenres.size() - 1), triedGenres.get(triedGenres.size() - 1));
+    				addPlayListSpecial(triedGenres.get(triedGenres.size() - 1).toLowerCase(), triedGenres.get(triedGenres.size() - 1).toLowerCase());
     			} else {
-    				removePlayListSpecial(triedGenres.get(triedGenres.size() - 1));
+    				removePlayListSpecial(triedGenres.get(triedGenres.size() - 1).toLowerCase());
     			}
     		}
     	}
