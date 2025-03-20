@@ -81,6 +81,10 @@ public class Song {
 		return playCount;
 	}
 	
+	public void incrementPlay() {
+		playCount ++;
+	}
+	
 	public void setRating(int n) {
 		/* Sets the rating of the song object.
 		 * Note that in normal usage, n should never be outside of 1-5 bounds. */
