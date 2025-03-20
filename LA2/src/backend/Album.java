@@ -46,7 +46,6 @@ public class Album {
 			}
 		}
 		if (!exists) songs.add(new Song(songInst));
-		// SHOULD PROBABLY RETURN SOMETHING SAYING IT FAILED. --------------------------------------------------------------------------
 	}
 	
 	protected void removeSong(String title, String artist) {
