@@ -6,15 +6,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.math.BigInteger;
+
 import frontend.*;
 
 public class AccountStorage {
-	private ArrayList<LibraryModel> accountLibraries;
+	private HashMap<Integer, LibraryModel> accountLibraries;
 	public AccountStorage() {
-		accountLibraries = new ArrayList<LibraryModel>();
+		accountLibraries = new HashMap<Integer, LibraryModel>();
 	}
 	
 	public boolean canCreateAUser(String user) throws FileNotFoundException{
@@ -39,7 +40,7 @@ public class AccountStorage {
 				myWriter.write(user.toLowerCase() + " " + hash + "\n");
 				myWriter.close();
 				LibraryModel newLibrary = new LibraryModel(user);
-				accountLibraries.add(newLibrary);
+				accountLibraries.put(user.toLowerCase().hashCode(), newLibrary);
 				System.out.println("User successfully created.");
 			} catch (IOException e) {
 				System.out.println("An error occurred.");
@@ -66,6 +67,7 @@ public class AccountStorage {
 		return false;
 	}
 	
+	/*
 	public void openLibrary(String user, String password) throws FileNotFoundException{
 		for(int i = 0; i < accountLibraries.size(); i++) {
 			//System.out.println(accountLibraries.get(i).getUsername());
@@ -74,6 +76,15 @@ public class AccountStorage {
 				if(accountLibraries.get(i).checkIfCorrectUsername(user)) {
 					View newView = new View(accountLibraries.get(i));
 				}
+			}
+		}
+	}*/
+	
+	public void openLibrary(String user, String password) throws FileNotFoundException {
+		LibraryModel getLibrary = accountLibraries.get(user.toLowerCase().hashCode());
+		if (canLogIn(user, password)) {
+			if (getLibrary.checkIfCorrectUsername(user)) {
+				View newView = new View(getLibrary);
 			}
 		}
 	}
