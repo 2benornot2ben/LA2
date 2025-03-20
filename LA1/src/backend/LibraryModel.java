@@ -171,7 +171,7 @@ public class LibraryModel {
 				String album = songList.get(i).getAlbumName();
 				Song songSave = songList.get(i);
 				songList.remove(i);
-				runSpecialFunctions(songSave, false);
+				runSpecialFunctions(songSave, false, 0);
 				removeSongFromPlaylistSpecial(title, artist);
 				for (int j = 0; j < albumList.size(); j++) {
 					if (albumList.get(j).getAlbumName().toLowerCase().equals(album.toLowerCase()) && albumList.get(j).getArtist().toLowerCase().equals(artist.toLowerCase())) {
@@ -196,7 +196,7 @@ public class LibraryModel {
 						}
 						Song songSave = songList.get(i);
 						songList.remove(j);
-						runSpecialFunctions(songSave, false);
+						runSpecialFunctions(songSave, false, 0);
 					}
 				}
 				albumList.remove(i);
@@ -225,7 +225,7 @@ public class LibraryModel {
 		// without this check if it somehow did.
 		if (!songList.contains(song)) {
 			songList.add(new Song(song));
-			runSpecialFunctions(song, true);
+			runSpecialFunctions(song, true, 0);
 		}
 		// Artist might already be in there
 		if (!artistList.contains(song.getArtist())){
@@ -249,6 +249,9 @@ public class LibraryModel {
 	
 	public void addAlbumToList(Album album) {
 		/* Adds an album to the library, plus all it's songs */
+		if(albumList.size() == 0) {
+			albumList.add(new Album(album));
+		}
 		for(int i = 0; i < albumList.size(); i++) {
 			if(albumList.get(i).getAlbumName().equals(album.getAlbumName()) && albumList.get(i).getArtist().equals(album.getArtist())) {
 				for(int j = 0; j < album.getSongList().size(); j++) {
@@ -267,7 +270,7 @@ public class LibraryModel {
 		for(int i = 0; i < album.getSongList().size(); i++) {
 			if(!songs.contains(album.getSongList().get(i).getSongName())) {
 				songList.add(album.getSongList().get(i));
-				runSpecialFunctions(songList.get(songList.size() - 1), true);
+				runSpecialFunctions(songList.get(songList.size() - 1), true, 0);
 			}
 		}
 		
@@ -358,7 +361,7 @@ public class LibraryModel {
             	// At this point we've found it, so either branch will end the loop.
                 if (!songList.get(i).getFavorited()) {
                     songList.get(i).favorite();
-                    runSpecialFunctions(songList.get(i), true);
+                    runSpecialFunctions(songList.get(i), true, 0);
                     return true; // ("Success")
                 } else return false;
             }
@@ -374,7 +377,7 @@ public class LibraryModel {
         		songList.get(i).setRating(rating);
         		if (rating == 5) songList.get(i).favorite(); // Spec
                 else songList.get(i).unfavorite();
-        		runSpecialFunctions(songList.get(i), true);
+        		runSpecialFunctions(songList.get(i), true, 0);
         	}
         }
     }
@@ -396,6 +399,17 @@ public class LibraryModel {
 			}
 		}
 		return false;
+    }
+    
+    public boolean playASong(String title, String artist) {
+    	for (int i = 0; i < songList.size(); i++) {
+			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
+				songList.get(i).incrementPlay();
+				this.runSpecialFunctions(songList.get(i), true, 1);
+				return true;
+			}
+    	}
+    	return false;
     }
     
     // Internal functions
@@ -532,7 +546,7 @@ public class LibraryModel {
 		}
 	}
     
-    private void runSpecialFunctions(Song song, boolean exists) {
+    private void runSpecialFunctions(Song song, boolean exists, int subInstruction) {
     	// To avoid mapping issues, i'm doing it this way.
     	// This must be ran every time a SONG is removed. If an album is removed, it must be ran a lot.
     	// Also, "exists" is basically just a way to fix up the genres w/o adding it again
@@ -557,7 +571,7 @@ public class LibraryModel {
     	}
     	if (exists) {
 	    	for (int i = 0; i < playListList.size(); i++) {
-	    		playListList.get(i).runSpecialModifier(song, 0);
+	    		playListList.get(i).runSpecialModifier(song, subInstruction);
 	    	}
     	}
     }
