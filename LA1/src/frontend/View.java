@@ -26,7 +26,7 @@ public class View {
 	String holdInputLower = "";
 	public View(LibraryModel myLibrary) throws FileNotFoundException{
 		/* This function lets the user interact with the back end
-		 * and preform all of it's functions simply by typing
+		 * and perform all of it's functions simply by typing
 		 * commands into the console in their respective orders. */
 		boolean running = true;
 		this.myLibrary = myLibrary;
@@ -44,6 +44,8 @@ public class View {
 				System.out.println("Enter: \"AddP\" to add a song to a playlist");
 				System.out.println("Enter: \"RemoveP\" to remove a song from a playlist");
 				System.out.println("Enter: \"Markf\" to mark a song favorite");
+				System.out.println("Enter: \"Play\" to play a song from your library");
+				System.out.println("Enter: \"Shuffle\" to shuffle your library songlist");
 				System.out.println("Enter: \"Exit\" to kill the program. You will need to rerun it after.");
 				System.out.println("This is not case sensitive, but is spelling sensitive.");
 				minimize = true;
@@ -330,6 +332,18 @@ public class View {
 					} else {
 						System.out.println("Shuffle failed");
 					}
+				}
+			} else if (holdInputLower.split(" ")[0].equals("play")) {
+				System.out.println("");
+				System.out.print("Enter a title of the song you want to play: ");
+        		String title = getInput.nextLine();
+				System.out.print("Enter an artist of the song you want to play: ");
+				String artist = getInput.nextLine();
+				System.out.println("");
+				if(myLibrary.playASong(title, artist)) {
+					System.out.println("The song " + title + " by " + artist + " has been played!");
+				} else {
+					System.out.println("The song " + title + " by " + artist + " is not found in the library");
 				}
 			} else if (holdInputLower.split(" ")[0].equals("exit")) {
 				// Kills the program
