@@ -1,3 +1,4 @@
+
 package backend;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,6 +76,7 @@ class AccountStorageTest {
         LibraryModel library = new LibraryModel("davrr");
         
         storage.openLibrary("davrr", "a"); 
+        System.setIn(new ByteArrayInputStream("exit".getBytes()));
         file.delete();
         
     }

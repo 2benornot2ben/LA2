@@ -31,6 +31,8 @@ public class LibraryModel {
 		this.database = new MusicStore();
 		this.username = username.toLowerCase();
 		
+		// These are the 4 special playlists. Past this point, the only
+		// special playlists would be genre-based ones.
 		playListList.add(new PlayList("favorites", "favorite"));
 		playListList.add(new PlayList("top rated", "topRated"));
 		playListList.add(new PlayList("recent", "recent"));
@@ -91,6 +93,8 @@ public class LibraryModel {
 	}
 	
 	public boolean checkAlbum(String title, String artist) {
+		/* Checks to see if such an album with title
+		 * and artist exists. */
 		for(int i = 0; i < albumList.size(); i++) {
 			if(albumList.get(i).getAlbumName().toLowerCase().equals(title.toLowerCase()) && albumList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				return true;
@@ -166,16 +170,24 @@ public class LibraryModel {
 	
 	
 	public void removeSong(String title, String artist) {
+		/* Removes a song from the songlist. If it's the last
+		 * song of a album/artist, it removes them too. It also
+		 * removes copies of the song just about everywhere
+		 * library-related. */
 		for (int i = 0; i < songList.size(); i++) {
 			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				String album = songList.get(i).getAlbumName();
 				Song songSave = songList.get(i);
 				songList.remove(i);
+				// Runs specialFunctions with it set to false, so to say it was removed.
 				runSpecialFunctions(songSave, false, 0);
+				// All "special" functions are private and have power over all types of playlists.
 				removeSongFromPlaylistSpecial(title, artist);
+				// Check all albums...
 				for (int j = 0; j < albumList.size(); j++) {
 					if (albumList.get(j).getAlbumName().toLowerCase().equals(album.toLowerCase()) && albumList.get(j).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 						albumList.get(j).removeSong(title, artist);
+						// It's empty! Remove it!
 						if(albumList.get(j).getSongList().size() == 0) {
 							removeAlbum(album, artist);
 						}
@@ -183,25 +195,34 @@ public class LibraryModel {
 				}
 			}
 		}
+		// This does the thing with albums, but for artists.
 		removeUnusedArtists();
 	}
 	
 	public void removeAlbum(String title, String artist) {
+		/* This removes a given album, along with it's songs,
+		 * and maybe it's artist. */
 		for (int i = 0; i < albumList.size(); i++) {
 			if (albumList.get(i).getAlbumName().toLowerCase().equals(title.toLowerCase()) && albumList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				for(int j = songList.size()-1; j > -1; j--) {
+					// Iteratively remove every song...
 					if(songList.get(j).getAlbumName().toLowerCase().equals(title.toLowerCase())) {
+						// First from all playlists...
 						for(int k = 0; k < playListList.size(); k++) {
-							boolean temp = removeSongFromPlaylist(playListList.get(k).getPlayListName(), songList.get(j).getSongName(), artist);
+							removeSongFromPlaylist(playListList.get(k).getPlayListName(), songList.get(j).getSongName(), artist);
 						}
+						// And then from itself.
 						Song songSave = songList.get(i);
 						songList.remove(j);
+						// Oh, and then from special functions, so they can keep track.
 						runSpecialFunctions(songSave, false, 0);
 					}
 				}
+				// It's empty now; goodbye.
 				albumList.remove(i);
 			}
 		}
+		// This checks to see if the artist is unused now.
 		removeUnusedArtists();
 	}
 	
@@ -238,9 +259,11 @@ public class LibraryModel {
 		for (Album album : albumList) {
 			if (album.equals(albumCheck)) {
 				contains = true;
+				// (If it was just added, then it wasn't in there - so add it!)
 				album.addSong(song);
 			}
 		}
+		// It doesn't exist! Time to make it exist.
 		if (!contains) {
 			albumCheck.addSong(song);
 			albumList.add(albumCheck);
@@ -248,27 +271,36 @@ public class LibraryModel {
     }
 	
 	public void addAlbumToList(Album album) {
-		/* Adds an album to the library, plus all it's songs */
-		if(albumList.size() == 0) {
+		/* Adds an album to the library, plus all it's songs. */
+		// Check if it exits already
+		boolean exists = false;
+		for (int i = 0; i < albumList.size(); i++) {
+			if(albumList.get(i).getAlbumName().equals(album.getAlbumName()) && albumList.get(i).getArtist().equals(album.getArtist())) {
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			// If not, add it.
 			albumList.add(new Album(album));
 		}
 		for(int i = 0; i < albumList.size(); i++) {
 			if(albumList.get(i).getAlbumName().equals(album.getAlbumName()) && albumList.get(i).getArtist().equals(album.getArtist())) {
+				// If it already did exist, be sure it has everything.
 				for(int j = 0; j < album.getSongList().size(); j++) {
 					albumList.get(i).addSong(album.getSongList().get(j));
-					// runSpecialFunctions(album.getSongList().get(j));
-					// May not be necessary.
 				}
-			} else {
-				albumList.add(new Album(album));
 			}
 		}
 		ArrayList<String> songs = new ArrayList<String>();
 		for(int i = 0; i < songList.size(); i++) {
+			// Add everything currently in the songlist...
 			songs.add(songList.get(i).getSongName());
 		}
 		for(int i = 0; i < album.getSongList().size(); i++) {
 			if(!songs.contains(album.getSongList().get(i).getSongName())) {
+				// ... Then adds any missing ones to the song list,
+				// just to make absolute sure.
 				songList.add(album.getSongList().get(i));
 				runSpecialFunctions(songList.get(songList.size() - 1), true, 0);
 			}
@@ -307,7 +339,8 @@ public class LibraryModel {
 	public ArrayList<String> getLibraryPlayListList(boolean getSpecial){
 		/* Returns a duplicate of the library playlist list, in name form. */
 		ArrayList<String> list = new ArrayList<String>();
-		for (int i = 0; i < this.playListList.size(); i++){
+		for (int i = 0; i < this.playListList.size(); i++) {
+			// If getspecial, we want em all. Otherwise, just usermade ones.
 			if (getSpecial || playListList.get(i).isUserMade()) {
 				list.add(playListList.get(i).getPlayListName());
 			}
@@ -317,13 +350,17 @@ public class LibraryModel {
 	
 	public ArrayList<String> getLibraryFavoriteSongs(boolean sort) {
 		/* Returns a duplicate of the library song list, in name form.
-		 * However, ones which are not favorited are excluded. */
+		 * However, ones which are not favorited are excluded.
+		 * Now with the ability to sort them, and if it does,
+		 * will return all rated 1-5 instead. */
 		ArrayList<Song> songListCopy = new ArrayList<Song>(songList);
 		if (sort) {
+			// If sort, then we need to give the below part a sorted copy of the songs.
 			boolean sorted = false;
 			boolean sortAttempt = true;
 			// We will use insertion sort.
 			while (!sorted) {
+				// Continues until it goes a entire attempt without swapping.
 				sortAttempt = true;
 				for (int i = 0; i < songListCopy.size() - 1; i++) {
 					if (songListCopy.get(i).getRating() > songListCopy.get(i + 1).getRating()) {
@@ -336,6 +373,7 @@ public class LibraryModel {
 		}
         ArrayList<String> favoriteSongs = new ArrayList<String>();
 		for (int i = 0; i < songListCopy.size(); i++){
+			// If we sorted it earlier, then we want all rated 1-5. Else, we just want those rated 5.
             if (songListCopy.get(i).getFavorited() == true || (sort && songListCopy.get(i).getRating() > 0) ){
                 favoriteSongs.add(songListCopy.get(i).getSongName());
             }
@@ -385,14 +423,17 @@ public class LibraryModel {
     }
     
     public boolean checkIfCorrectUsername(String username) {
+    	/* Checks if it's given the right username for this library. Doesn't return the username.*/
     	return (this.username.equals(username.toLowerCase()));
     }
     
     public void shuffleLibrary() {
+    	/* Shuffles the songlist of itself. */
     	Collections.shuffle(songList);
     }
     
     public boolean shufflePlayList(String name) {
+    	/* Shuffles the songlist of a given playlist's name. Also returns if it worked. */
 		for (int i = 0; i < playListList.size(); i++) {
 			if (playListList.get(i).getPlayListName().toLowerCase().equals(name.toLowerCase()) && playListList.get(i).isUserMade()) {
 				// No duplicates, so we can just break out immediately.
@@ -404,9 +445,12 @@ public class LibraryModel {
     }
     
     public boolean playASong(String title, String artist) {
+    	/* Plays a given song, and by that, it increments its play count by 1. */
     	for (int i = 0; i < songList.size(); i++) {
 			if (songList.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songList.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				songList.get(i).incrementPlay();
+				// Look at the number, it's a 1. That stands for "was played", so recent & most played will
+				// update themselves this time, along with everything else of course.
 				this.runSpecialFunctions(songList.get(i), true, 1);
 				return true;
 			}
@@ -530,17 +574,23 @@ public class LibraryModel {
 	}
     
     private void removeUnusedArtists() {
+    	/* Checks around for used artists. If one doesn't come up,
+    	 * but is still listed as an artist, removes them! */
 		ArrayList<String> artists = new ArrayList<String>();
+		// First checks songs..
 		for(int i = 0; i < songList.size(); i++) {
 			if(!artists.contains(songList.get(i).getArtist())) {
 				artists.add(songList.get(i).getArtist());
 			}
 		}
+		// Then albums...
 		for(int i = 0; i < albumList.size(); i++) {
 			if(!artists.contains(albumList.get(i).getArtist())) {
 				artists.add(albumList.get(i).getArtist());
 			}
 		}
+		// Then runs to artists with the results. Not there? Goodbye.
+		// (Goes top to bottom to avoid errors)
 		for(int i = artistList.size()-1; i > -1; i--) {
 			if(!artists.contains(artistList.get(i))) {
 				artistList.remove(i);
@@ -549,21 +599,25 @@ public class LibraryModel {
 	}
     
     private void runSpecialFunctions(Song song, boolean exists, int subInstruction) {
-    	// To avoid mapping issues, i'm doing it this way.
-    	// This must be ran every time a SONG is removed. If an album is removed, it must be ran a lot.
+    	/* Updates every special function. Must be ran everytime something that they'd
+    	 * care about updates, including multiple times when multiple things change. */
     	// Also, "exists" is basically just a way to fix up the genres w/o adding it again
     	// after removal.
     	ArrayList<String> triedGenres = new ArrayList<String>();
     	int counter = 0;
     	for (int i = 0; i < songList.size(); i++) {
+    		// This part tries to add new genre playlists.
+    		// ... Or remove them.
     		counter = 0;
     		if (!triedGenres.contains(songList.get(i).getGenre())) {
     			triedGenres.add(songList.get(i).getGenre());
+    			// Incrmeents the counter for each genre...
     			for (int j = i; j < songList.size(); j++) {
     				if (songList.get(i).getGenre().equals(triedGenres.get(triedGenres.size() - 1))) {
     					counter++;
     				}
     			}
+    			// If 10 or above, adds. Else, removes. Can handle them not being there / already being there.
     			if (counter >= 10) {
     				addPlayListSpecial(triedGenres.get(triedGenres.size() - 1).toLowerCase(), triedGenres.get(triedGenres.size() - 1).toLowerCase());
     			} else {

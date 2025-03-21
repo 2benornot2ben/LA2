@@ -104,13 +104,14 @@ public class View {
 					System.out.println("Library is empty!");
 				} else {
 					if(option.split(" ")[0].equals("1")) {
-						// removes a song from an album as well.
+						// Removes a song from an album as well.
 						System.out.print("Enter a title of the song you want to remove: ");
 						String title = getInput.nextLine();
 						System.out.print("Enter an artist of the song you want to remove: ");
 						String artist = getInput.nextLine();
 						removeSong_Function(title, artist);
 					} else if(option.split(" ")[0].equals("2")) {
+						// Removes all the songs too (seen later)
 						System.out.print("Enter a title of the album you want to remove: ");
 						String title = getInput.nextLine();
 						System.out.print("Enter an artist of the album you want to remove: ");
@@ -123,7 +124,7 @@ public class View {
 				
 				
 				// This handles ADDING, for both Albums and Songs.
-			}else if (holdInputLower.split(" ")[0].equals("add") && holdInputLower.split(" ").length > 1 &&
+			} else if (holdInputLower.split(" ")[0].equals("add") && holdInputLower.split(" ").length > 1 &&
 					(holdInputLower.split(" ")[1].equals("album") || holdInputLower.split(" ")[1].equals("song"))) {
 				System.out.println("");
 				System.out.print("Enter a title of the " + holdInputLower.split(" ")[1] + " you want to add: ");
@@ -141,19 +142,22 @@ public class View {
 			} else if (holdInputLower.split(" ")[0].equals("get")) {
 				System.out.println("");
 				System.out.println("YOU CAN GET A LIST OF ...");
+				// Instead of having 8, these 2 have special (s) markers.
 				System.out.println("1. Song titles (s)");
 				System.out.println("2. Artists (s)");
 				System.out.println("3. Albums");
 				System.out.println("4. Playlists");
 				System.out.println("5. Favorite Songs");
-				System.out.println("6. By rating (sorted)");
+				// This one is, evidentally, sorted automatically. No need for s.
+				System.out.println("6. By rating (auto-sorted)");
 				System.out.println("Type \"(num) s\" if you want it sorted (must have a \"(s)\" symbol in the list)");
 				System.out.print("Enter the number of an option you want: ");
 				String option = getInput.nextLine();
 				System.out.println("");
-				// Handling the 5 numbers the users could've input, sadly one at a time.
+				// Handling the 6 numbers the users could've input, sadly one at a time.
 				if (option.split(" ")[0].equals("1")) {
 					ArrayList<String> songNames = myLibrary.getLibrarySongList();
+					// This line handles the sorting bit, with just Collections.sort(). Very simple, actually.
 					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) Collections.sort(songNames);
 					if(songNames.size() == 0) System.out.println("No songs in the library");
 					else getPrintText(songNames);
@@ -167,14 +171,17 @@ public class View {
 					if (albums.size() == 0) System.out.println("No albums in the library");
 					else getPrintText(albums);
 				} else if (option.equals("4")) {
+					// getLibraryPlayListList. The "true" means "also get special playlists".
 					ArrayList<String> playLists = myLibrary.getLibraryPlayListList(true);
 					if(playLists.size() == 0) System.out.println("No playlists in the library");
 					else getPrintText(playLists);
 				} else if (option.split(" ")[0].equals("5")) {
+					// getLibraryFavoriteSongs. The boolean determines if to get only favorites, or all but sorted.
 					ArrayList<String> favorite = myLibrary.getLibraryFavoriteSongs(false);
 					if(favorite.size() == 0) System.out.println("No favorite songs in the library");
 					else getPrintText(favorite);
-				} else if (option.split(" ")[0].equals("6")){
+				} else if (option.split(" ")[0].equals("6")) {
+					// (Useful for avoiding duplicated functions, like what this would've been)
 					ArrayList<String> songs = myLibrary.getLibraryFavoriteSongs(true);
 					if(songs.size() == 0) System.out.println("No rated songs in the library");
 					else getPrintText(songs);
@@ -295,8 +302,7 @@ public class View {
 			        	// A number within range...
 			        	if (!(num > 0 && num <= playlists.size())) {
 			        		System.out.println("Your input is invalid");
-			        	}
-			        	else {
+			        	} else {
 			        		System.out.print("Enter a title of the song you want to remove from a playlist: ");
 			        		String title = getInput.nextLine();
 							System.out.print("Enter an artist of the song you want to remove to a playlist: ");
@@ -306,12 +312,11 @@ public class View {
 							System.out.println("");
 							removeFromPlayList_Function(title, artist, playListName);
 						}
-			        }
-					else {
+			        } else {
 			        	System.out.println("Your input is invalid");
 			        }
 				}
-			// This EXITS the program. This one's probably self explanitory.
+			// This SHUFFLES the songs of either the Library or a Playlist
 			} else if (holdInputLower.split(" ")[0].equals("shuffle")) {
 				System.out.println("");
 				System.out.println("Which do you want to shuffle?");
@@ -324,8 +329,9 @@ public class View {
 					System.out.println("Library shuffled");
 					myLibrary.shuffleLibrary();
 				} else if (option.equals("2")) {
-					System.out.println("Enter playlist name");
+					System.out.println("Enter playlist name:");
 					String name = getInput.nextLine();
+					// worked is self-expalanitory - it's if it worked or not.
 					boolean worked = myLibrary.shufflePlayList(name);
 					if (worked) {
 						System.out.println("Playlist shuffled successfully");
@@ -333,6 +339,7 @@ public class View {
 						System.out.println("Shuffle failed");
 					}
 				}
+			// This PLAYS a SONG. Simple enough, right?
 			} else if (holdInputLower.split(" ")[0].equals("play")) {
 				System.out.println("");
 				System.out.print("Enter a title of the song you want to play: ");
@@ -340,11 +347,13 @@ public class View {
 				System.out.print("Enter an artist of the song you want to play: ");
 				String artist = getInput.nextLine();
 				System.out.println("");
-				if(myLibrary.playASong(title, artist)) {
+				// The if statement here also increments the song plays, if it finds one.
+				if (myLibrary.playASong(title, artist)) {
 					System.out.println("The song " + title + " by " + artist + " has been played!");
 				} else {
 					System.out.println("The song " + title + " by " + artist + " is not found in the library");
 				}
+			// This EXITS the program. This one's probably self explanitory.
 			} else if (holdInputLower.split(" ")[0].equals("exit")) {
 				// Kills the program
 				running = false;
@@ -355,7 +364,6 @@ public class View {
 				minimize = false;
 			}
 			System.out.println(""); // Extra whitespace
-			
 		} 
 	}
 	
@@ -521,17 +529,21 @@ public class View {
 	}
 	
 	private void removeSong_Function(String title, String artist) {
-		if(myLibrary.canRemoveSong(title, artist)) {
+		/* Handles removing a song from the library.
+		 * ... That's it. */
+		if (myLibrary.canRemoveSong(title, artist)) {
 			myLibrary.removeSong(title, artist);
 			System.out.println("A song " + title + " by " + artist + " has been removed from library.");
-		}else {
+		} else {
 			System.out.println("A song " + title + " by " + artist + " is not found in the library");
 		}
 		
 	}
 	
 	private void removeAlbum_Function(String title, String artist) {
-		if(myLibrary.canRemoveAlbum(title, artist)) {
+		/* Handles removing an album from the library.
+		 * ... That's it. Note that this also removees related songs. */
+		if (myLibrary.canRemoveAlbum(title, artist)) {
 			myLibrary.removeAlbum(title, artist);
 			System.out.println("An album " + title + " by " + artist + " has been removed from library.");
 		}else {
@@ -568,6 +580,7 @@ public class View {
 					}
 				}
 			}
+			// Printing the text happens after, since we need vars from above.
 			printAdditionText(added, exists, title, artist);
 		}
 	}

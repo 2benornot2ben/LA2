@@ -16,20 +16,6 @@ public class PlayList {
 	private String specialMod; // Set to "" if there's none, set to {genreName} for genre ones!
 	// There is also "favorite", "topRated", "recent", and "mostPlayed"
 
-	// Future us! I have NOT made it so the songs inside the albums are updated
-	// whenever the library ones are.
-	// I'll lay the plan here:
-	// People can WATCH songs inside of playlists, so when you want to add a view...
-	// Don't! Somehow make library get an instruction for it, and then loop
-	// through every playlist. Then, have the playlists look to see if they have
-	// the song. If they do, use a custom replace method to keep it in the
-	// same spot WITHOUT LOSING ORDER! (You can use .equals(), it only uses
-	// vars that don't change throughout runtime).
-	// That second part should actually be done for everything which
-	// modifies a song in general, barring straight up removal.
-	// Removal will be similar, but be it's own thing (not hard to imagine
-	// how it would work).
-	
 	public PlayList(String playListName, String specialModifier) {
 		/* Initializes a playlist, with it's name
 		 * and an empty list. */
@@ -52,7 +38,6 @@ public class PlayList {
 	public boolean canAddSongToList(Song song) {
 		/* Determines if a song is already inside it's list. */
 		for(int i = 0; i < songs.size(); i++) {
-			//if(songs.get(i).getSongName().toLowerCase().equals(song.getSongName()) && songs.get(i).getArtist().toLowerCase().equals(song.getArtist())) {
 			if (songs.get(i).equals(song)) {
 				// No need to iterate more; it is.
 				return false;
@@ -98,25 +83,32 @@ public class PlayList {
 	}
 	
 	public boolean isUserMade() {
+		// "" stands for "usermade". We're banking on a genre not being called "".
+		// ... Pretty safe bet to make.
 		return specialMod.equals("");
 	}
 	
 	public void songShuffle() {
+		/* Shuffles songs inside the playlist. Also, requires it to be usermade - 
+		 * most specials have their own sorting mechanisms. */
 		if (isUserMade()) {
 			Collections.shuffle(songs);
 		}
 	}
 	
 	public void runSpecialModifier(Song song, int subInstruction) {
-		// This method does NOT handle updating preexisting songs!
-		// This simply handles specifically special method
-		// functions!
-		// Also, this assumes that it is ran EVERY TIME something might happen to the playlist!
-		// If you do 2 things and then run it, errors may occur!
+		/* Updates itself according to what the special functions would logically
+		 * want to do - favorite needs favorites, toprated needs 5 stars,
+		 * recent needs sorted by recently played, and mostplayed needs
+		 * sorting by most played songs.
+		 * Also handles genre specials with the default.
+		 * Must be ran EVERY TIME a song is modified in a way which matters. */
 		if (!(specialMod.equals(""))) {
+			// Switch statement, because fancy.
 			switch (specialMod) {
 			case ("favorite"):
 				// Does not use subInstruction
+				// If favorite, add it. If not favorite, remove it. Might already be done, which is ok.
 				if (song.getFavorited() && canAddSongToList(song)) {
 					addSong(song);
 				} else if (!song.getFavorited() && !canAddSongToList(song)) {
@@ -124,6 +116,8 @@ public class PlayList {
 				}
 				break;
 			case ("topRated"):
+				// Does not use subInstruction
+				// If 4+, add it. If not, remove it. Might already be done, which still works fine.
 				if (song.getRating() >= 4 && canAddSongToList(song)) {
 					addSong(song);
 				} else if (song.getRating() <= 3 && !canAddSongToList(song)) {
@@ -146,7 +140,7 @@ public class PlayList {
 				break;
 			case ("mostPlayed"):
 				// If subInstruction == 1, then we updated the view count.
-				// You think it wouldn't matter, but odd removal behavior if we don't.
+				// You think it wouldn't matter, but odd behavior if we don't.
 				if (subInstruction == 1) {
 					if (!canAddSongToList(song)) {
 						removeSong(song.getSongName(), song.getArtist());
@@ -154,19 +148,24 @@ public class PlayList {
 					songs.add(0, song);
 					// Now we need to sort it.
 					for (int i = 0; i < songs.size() - 1; i++) {
+						// This is bubble sort, but it only runs once.
+						// This is why it must be ran every time.
 						if (songs.get(i).getPlayCount() < songs.get(i + 1).getPlayCount()) {
 							Song songHolder = songs.get(i);
 							songs.remove(i);
 							songs.add(i + 1, songHolder);
 						}
 					}
+					// Hard limit of 10
 					if (songs.size() > 10) {
 						songs.remove(songs.size() - 1);
 					}
 				}
 				break;
 			default:
-				if (song.getGenre().equals(specialMod)) {
+				// Genre doesn't care about order, and already has
+				// removals dealt with for it, so that's fine.
+				if (song.getGenre().toLowerCase().equals(specialMod)) {
 					if (canAddSongToList(song)) {
 						addSong(song);
 					}

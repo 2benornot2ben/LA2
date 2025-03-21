@@ -49,6 +49,7 @@ public class Album {
 	}
 	
 	protected void removeSong(String title, String artist) {
+		/* Removes a song from itself, if it's there. */
 		for (int i = 0; i < songs.size(); i++) {
 			if (songs.get(i).getSongName().toLowerCase().equals(title.toLowerCase()) && songs.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 				songs.remove(i);
@@ -106,6 +107,7 @@ public class Album {
 	
 	@Override
 	public int hashCode() {
+		/* Hashcode override. Compares what you'd expect. */
 	    return albumName.hashCode() + artist.hashCode() + genre.hashCode() + year.hashCode();
 	}
 }

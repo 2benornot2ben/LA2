@@ -82,7 +82,7 @@ public class Song {
 	}
 	
 	public void incrementPlay() {
-		playCount ++;
+		playCount++;
 	}
 	
 	public void setRating(int n) {
@@ -122,6 +122,7 @@ public class Song {
 	
 	@Override
 	public int hashCode() {
+		/* Hashcode override. Compares what you'd expect. */
 	    return songName.hashCode() + artist.hashCode() + albumName.hashCode() + genre.hashCode() + year.hashCode();
 	}
 }
