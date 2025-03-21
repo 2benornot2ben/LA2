@@ -304,11 +304,13 @@ public class LibraryModel {
 		return list;
 	}
 	
-	public ArrayList<String> getLibraryPlayListList(){
+	public ArrayList<String> getLibraryPlayListList(boolean getSpecial){
 		/* Returns a duplicate of the library playlist list, in name form. */
 		ArrayList<String> list = new ArrayList<String>();
 		for (int i = 0; i < this.playListList.size(); i++){
-            list.add(playListList.get(i).getPlayListName());
+			if (getSpecial || playListList.get(i).isUserMade()) {
+				list.add(playListList.get(i).getPlayListName());
+			}
         }
 		return list;
 	}

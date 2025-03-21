@@ -167,7 +167,7 @@ public class View {
 					if (albums.size() == 0) System.out.println("No albums in the library");
 					else getPrintText(albums);
 				} else if (option.equals("4")) {
-					ArrayList<String> playLists = myLibrary.getLibraryPlayListList();
+					ArrayList<String> playLists = myLibrary.getLibraryPlayListList(true);
 					if(playLists.size() == 0) System.out.println("No playlists in the library");
 					else getPrintText(playLists);
 				} else if (option.split(" ")[0].equals("5")) {
@@ -231,7 +231,7 @@ public class View {
 			// This handles ADDING to PLAYLISTS. One must already exist, of course.
 			} else if (holdInputLower.split(" ")[0].equals("addp")) {
 				System.out.println("");
-				ArrayList<String> playlists = myLibrary.getLibraryPlayListList();
+				ArrayList<String> playlists = myLibrary.getLibraryPlayListList(false);
 				if(playlists.size() == 0) {
 					// Immediate rejection if you don't have any.
 					System.out.println("No playlists in the library");
@@ -277,7 +277,7 @@ public class View {
 			// This handles REMOVING from PLAYLISTS. One must already exist, of course.
 			} else if (holdInputLower.split(" ")[0].equals("removep")) {
 				System.out.println("");
-				ArrayList<String> playlists = myLibrary.getLibraryPlayListList();
+				ArrayList<String> playlists = myLibrary.getLibraryPlayListList(false);
 				if(playlists.size() == 0) {
 					// Immediate rejection if you don't have any.
 					System.out.println("No playlists in the library");
