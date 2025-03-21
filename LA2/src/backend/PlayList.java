@@ -13,8 +13,8 @@ public class PlayList {
 	 * about a playlist object. */
 	private String playListName;
 	private ArrayList<Song> songs;
-	private String specialMod; // Set to "" if there's none, set to {genreName} for genre ones!
-	// There is also "favorite", "topRated", "recent", and "mostPlayed"
+	private String specialMod; // Set to "" if there's none, set to {genrename} for genre ones!
+	// There is also "favorite", "toprated", "recent", and "mostplayed"
 
 	public PlayList(String playListName, String specialModifier) {
 		/* Initializes a playlist, with it's name
@@ -96,7 +96,7 @@ public class PlayList {
 		}
 	}
 	
-	public void runSpecialModifier(Song song, int subInstruction) {
+	protected void runSpecialModifier(Song song, int subInstruction) {
 		/* Updates itself according to what the special functions would logically
 		 * want to do - favorite needs favorites, toprated needs 5 stars,
 		 * recent needs sorted by recently played, and mostplayed needs
