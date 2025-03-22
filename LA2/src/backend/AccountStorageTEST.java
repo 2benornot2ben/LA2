@@ -75,8 +75,8 @@ class AccountStorageTest {
         storage.createAUser("davrr", "a");
         LibraryModel library = new LibraryModel("davrr");
         
-        storage.openLibrary("davrr", "a"); 
         System.setIn(new ByteArrayInputStream("exit".getBytes()));
+        storage.openLibrary("davrr", "a"); 
         file.delete();
         
     }

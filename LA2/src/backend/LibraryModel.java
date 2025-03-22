@@ -613,7 +613,7 @@ public class LibraryModel {
     			triedGenres.add(songList.get(i).getGenre());
     			// Incrmeents the counter for each genre...
     			for (int j = i; j < songList.size(); j++) {
-    				if (songList.get(i).getGenre().equals(triedGenres.get(triedGenres.size() - 1))) {
+    				if (songList.get(j).getGenre().equals(triedGenres.get(triedGenres.size() - 1))) {
     					counter++;
     				}
     			}

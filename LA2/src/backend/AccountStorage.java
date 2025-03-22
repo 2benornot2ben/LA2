@@ -128,6 +128,5 @@ public class AccountStorage {
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-		
 	}
 }
