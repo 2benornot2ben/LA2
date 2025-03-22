@@ -106,5 +106,23 @@ class SongTEST {
 		assertFalse(initSong1.equals(initSong6));
 		assertFalse(initSong1.equals(initAlbum));
 	}
+	
+	@Test
+	void test_09() {
+		Song initSong1 = new Song("1", "2", "3", "4", "5");
+		assertEquals(initSong1.getPlayCount(), 0);
+		initSong1.incrementPlay();
+		assertEquals(initSong1.getPlayCount(), 1);
+	}
+	
+	@Test
+	void test_10() {
+		Song initSong1 = new Song("1", "2", "3", "4", "5");
+		Song initSong2 = new Song("1", "3", "3", "4", "5"); // There's 2 3's here
+		Song initSong3 = new Song("1", "2", "3", "4", "5");
+		assertEquals((initSong1.hashCode() == initSong2.hashCode()), initSong1.equals(initSong2));
+		assertEquals((initSong1.hashCode() == initSong3.hashCode()), initSong1.equals(initSong3));
+		assertEquals((initSong2.hashCode() == initSong3.hashCode()), initSong2.equals(initSong3));
+	}
 
 }

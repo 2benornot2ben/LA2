@@ -18,6 +18,7 @@ public class Song {
     private String year;
 	private int rating;
 	private boolean favorited;
+	private int playCount;
 	
 	public Song(String songName, String artist, String albumName, String genre, String year) {
 		/* Initializes everything to a song's specifications.
@@ -39,6 +40,7 @@ public class Song {
         this.year = incomingSong.getYear();
         this.favorited = incomingSong.getFavorited();
         this.rating = incomingSong.getRating();
+        this.playCount = incomingSong.getPlayCount();
 	}
 	
 	public String getPrintFormatted() {
@@ -75,6 +77,14 @@ public class Song {
 		return favorited;
 	}
 	
+	public int getPlayCount() {
+		return playCount;
+	}
+	
+	public void incrementPlay() {
+		playCount++;
+	}
+	
 	public void setRating(int n) {
 		/* Sets the rating of the song object.
 		 * Note that in normal usage, n should never be outside of 1-5 bounds. */
@@ -108,5 +118,11 @@ public class Song {
 	           albumName.equals(song.albumName) &&
 	           genre.equals(song.genre) &&
 	           year.equals(song.year);
+	}
+	
+	@Override
+	public int hashCode() {
+		/* Hashcode override. Compares what you'd expect. */
+	    return songName.hashCode() + artist.hashCode() + albumName.hashCode() + genre.hashCode() + year.hashCode();
 	}
 }

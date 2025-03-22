@@ -24,12 +24,12 @@ public class View {
 	Scanner getInput = new Scanner(System.in);
 	String holdInput = "";
 	String holdInputLower = "";
-	public View() throws FileNotFoundException{
+	public View(LibraryModel myLibrary) throws FileNotFoundException{
 		/* This function lets the user interact with the back end
-		 * and preform all of it's functions simply by typing
+		 * and perform all of it's functions simply by typing
 		 * commands into the console in their respective orders. */
-		myLibrary = new LibraryModel();
 		boolean running = true;
+		this.myLibrary = myLibrary;
 		while (running) {
 			// Basically, print this small line of text when the program cycles, UNLESS it was by immediate error / first beginning.
 			if (minimize) {
@@ -37,12 +37,15 @@ public class View {
 			} else {
 				System.out.println("Enter: \"Search\" \"MusicStore OR Library\" to begin SEARCHING (Library has Playlists)");
 				System.out.println("Enter: \"Add\" \"Album OR Song\" to add to Library or Playlists");
+				System.out.println("Enter: \"Remove\" to remove song/album from a library.");
 				System.out.println("Enter: \"Create\" \"{PlaylistName}\" to create a new playlist. No spaces in the name."); 
 				System.out.println("Enter: \"Rate\" to rate a song.");
 				System.out.println("Enter: \"Get\" to get a list from the library."); 
 				System.out.println("Enter: \"AddP\" to add a song to a playlist");
 				System.out.println("Enter: \"RemoveP\" to remove a song from a playlist");
 				System.out.println("Enter: \"Markf\" to mark a song favorite");
+				System.out.println("Enter: \"Play\" to play a song from your library");
+				System.out.println("Enter: \"Shuffle\" to shuffle your library songlist");
 				System.out.println("Enter: \"Exit\" to kill the program. You will need to rerun it after.");
 				System.out.println("This is not case sensitive, but is spelling sensitive.");
 				minimize = true;
@@ -59,33 +62,68 @@ public class View {
 				System.out.println("YOU CAN SEARCH FOR THE ...");
 				System.out.println("1. Song by title");
 				System.out.println("2. Song by artist");
-				System.out.println("3. Album by title");
-				System.out.println("4. Album by artist");
+				System.out.println("3. Song by genre");
+				System.out.println("4. Album by title");
+				System.out.println("5. Album by artist");
 				// MusicStore does not have a playlist.
-				if (locationHolder.equals("library")) System.out.println("5. Playlist by name");
+				if (locationHolder.equals("library")) System.out.println("6. Playlist by name");
 				
 				System.out.print("Enter the number of an option you want: ");
 				String searching = getInput.nextLine();
 				
 				// 1 and 2 are both Song type, hence we can do this without masking.
-				if (searching.equals("1") || searching.equals("2")) {
+				if (searching.equals("1") || searching.equals("2") || searching.equals("3")) {
 					searchSong_Function(searching, locationHolder);
 				}
 				
 				// 3 and 4 are both Album type, same idea.
-				else if (searching.equals("3") || searching.equals("4")) {
+				else if (searching.equals("4") || searching.equals("5")) {
 					searchAlbum_Function(searching, locationHolder);
 				}
 				
 				// 5 is only for searching the library, and is PlayList type.
-				else if(searching.equals("5") && locationHolder.equals("library")) {
+				else if(searching.equals("6") && locationHolder.equals("library")) {
 					searchPlayList_Function();
 				}
 				else {
 					System.out.println("Invalid number");
 				}
 			
-			// This handles ADDING, for both Albums and Songs.
+			
+			// This handles REMOVING, for both Albums and Songs.
+			} 
+			else if (holdInputLower.split(" ")[0].equals("remove")) {
+				System.out.println("");
+				System.out.println("What do you want to remove?");
+				System.out.println("1. Song from a library");
+				System.out.println("2. Album from a library");
+				System.out.print("Choose an option you want: ");
+				String option = getInput.nextLine();
+				ArrayList<String> songs = myLibrary.getLibrarySongList();
+				if(songs.size() == 0) {
+					System.out.println("Library is empty!");
+				} else {
+					if(option.split(" ")[0].equals("1")) {
+						// Removes a song from an album as well.
+						System.out.print("Enter a title of the song you want to remove: ");
+						String title = getInput.nextLine();
+						System.out.print("Enter an artist of the song you want to remove: ");
+						String artist = getInput.nextLine();
+						removeSong_Function(title, artist);
+					} else if(option.split(" ")[0].equals("2")) {
+						// Removes all the songs too (seen later)
+						System.out.print("Enter a title of the album you want to remove: ");
+						String title = getInput.nextLine();
+						System.out.print("Enter an artist of the album you want to remove: ");
+						String artist = getInput.nextLine();
+						removeAlbum_Function(title, artist);
+					} else {
+						System.out.println("Invalid input!");
+					}
+				}
+				
+				
+				// This handles ADDING, for both Albums and Songs.
 			} else if (holdInputLower.split(" ")[0].equals("add") && holdInputLower.split(" ").length > 1 &&
 					(holdInputLower.split(" ")[1].equals("album") || holdInputLower.split(" ")[1].equals("song"))) {
 				System.out.println("");
@@ -104,18 +142,22 @@ public class View {
 			} else if (holdInputLower.split(" ")[0].equals("get")) {
 				System.out.println("");
 				System.out.println("YOU CAN GET A LIST OF ...");
+				// Instead of having 8, these 2 have special (s) markers.
 				System.out.println("1. Song titles (s)");
 				System.out.println("2. Artists (s)");
 				System.out.println("3. Albums");
 				System.out.println("4. Playlists");
-				System.out.println("5. Favorite Songs (s) (Sorting it here will print out ALL songs sorted by rating)");
+				System.out.println("5. Favorite Songs");
+				// This one is, evidentally, sorted automatically. No need for s.
+				System.out.println("6. By rating (auto-sorted)");
 				System.out.println("Type \"(num) s\" if you want it sorted (must have a \"(s)\" symbol in the list)");
 				System.out.print("Enter the number of an option you want: ");
 				String option = getInput.nextLine();
 				System.out.println("");
-				// Handling the 5 numbers the users could've input, sadly one at a time.
+				// Handling the 6 numbers the users could've input, sadly one at a time.
 				if (option.split(" ")[0].equals("1")) {
 					ArrayList<String> songNames = myLibrary.getLibrarySongList();
+					// This line handles the sorting bit, with just Collections.sort(). Very simple, actually.
 					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) Collections.sort(songNames);
 					if(songNames.size() == 0) System.out.println("No songs in the library");
 					else getPrintText(songNames);
@@ -129,16 +171,21 @@ public class View {
 					if (albums.size() == 0) System.out.println("No albums in the library");
 					else getPrintText(albums);
 				} else if (option.equals("4")) {
-					ArrayList<String> playLists = myLibrary.getLibraryPlayListList();
+					// getLibraryPlayListList. The "true" means "also get special playlists".
+					ArrayList<String> playLists = myLibrary.getLibraryPlayListList(true);
 					if(playLists.size() == 0) System.out.println("No playlists in the library");
 					else getPrintText(playLists);
 				} else if (option.split(" ")[0].equals("5")) {
-					boolean sort = false;
-					if (option.split(" ").length > 1 && option.split(" ")[1].equals("s")) sort = true;
-					ArrayList<String> favorite = myLibrary.getLibraryFavoriteSongs(sort);
+					// getLibraryFavoriteSongs. The boolean determines if to get only favorites, or all but sorted.
+					ArrayList<String> favorite = myLibrary.getLibraryFavoriteSongs(false);
 					if(favorite.size() == 0) System.out.println("No favorite songs in the library");
 					else getPrintText(favorite);
-				} else {
+				} else if (option.split(" ")[0].equals("6")) {
+					// (Useful for avoiding duplicated functions, like what this would've been)
+					ArrayList<String> songs = myLibrary.getLibraryFavoriteSongs(true);
+					if(songs.size() == 0) System.out.println("No rated songs in the library");
+					else getPrintText(songs);
+			    }else {
 					System.out.println("Wrong input");
 				}
 				
@@ -191,7 +238,7 @@ public class View {
 			// This handles ADDING to PLAYLISTS. One must already exist, of course.
 			} else if (holdInputLower.split(" ")[0].equals("addp")) {
 				System.out.println("");
-				ArrayList<String> playlists = myLibrary.getLibraryPlayListList();
+				ArrayList<String> playlists = myLibrary.getLibraryPlayListList(false);
 				if(playlists.size() == 0) {
 					// Immediate rejection if you don't have any.
 					System.out.println("No playlists in the library");
@@ -237,7 +284,7 @@ public class View {
 			// This handles REMOVING from PLAYLISTS. One must already exist, of course.
 			} else if (holdInputLower.split(" ")[0].equals("removep")) {
 				System.out.println("");
-				ArrayList<String> playlists = myLibrary.getLibraryPlayListList();
+				ArrayList<String> playlists = myLibrary.getLibraryPlayListList(false);
 				if(playlists.size() == 0) {
 					// Immediate rejection if you don't have any.
 					System.out.println("No playlists in the library");
@@ -255,8 +302,7 @@ public class View {
 			        	// A number within range...
 			        	if (!(num > 0 && num <= playlists.size())) {
 			        		System.out.println("Your input is invalid");
-			        	}
-			        	else {
+			        	} else {
 			        		System.out.print("Enter a title of the song you want to remove from a playlist: ");
 			        		String title = getInput.nextLine();
 							System.out.print("Enter an artist of the song you want to remove to a playlist: ");
@@ -266,10 +312,46 @@ public class View {
 							System.out.println("");
 							removeFromPlayList_Function(title, artist, playListName);
 						}
-			        }
-					else {
+			        } else {
 			        	System.out.println("Your input is invalid");
 			        }
+				}
+			// This SHUFFLES the songs of either the Library or a Playlist
+			} else if (holdInputLower.split(" ")[0].equals("shuffle")) {
+				System.out.println("");
+				System.out.println("Which do you want to shuffle?");
+				System.out.println("1. Library");
+				System.out.println("2. Playlist");
+				System.out.print("Choose an option you want: ");
+				String option = getInput.nextLine();
+				System.out.println("");
+				if (option.equals("1")) {
+					System.out.println("Library shuffled");
+					myLibrary.shuffleLibrary();
+				} else if (option.equals("2")) {
+					System.out.println("Enter playlist name:");
+					String name = getInput.nextLine();
+					// worked is self-expalanitory - it's if it worked or not.
+					boolean worked = myLibrary.shufflePlayList(name);
+					if (worked) {
+						System.out.println("Playlist shuffled successfully");
+					} else {
+						System.out.println("Shuffle failed");
+					}
+				}
+			// This PLAYS a SONG. Simple enough, right?
+			} else if (holdInputLower.split(" ")[0].equals("play")) {
+				System.out.println("");
+				System.out.print("Enter a title of the song you want to play: ");
+        		String title = getInput.nextLine();
+				System.out.print("Enter an artist of the song you want to play: ");
+				String artist = getInput.nextLine();
+				System.out.println("");
+				// The if statement here also increments the song plays, if it finds one.
+				if (myLibrary.playASong(title, artist)) {
+					System.out.println("The song " + title + " by " + artist + " has been played!");
+				} else {
+					System.out.println("The song " + title + " by " + artist + " is not found in the library");
 				}
 			// This EXITS the program. This one's probably self explanitory.
 			} else if (holdInputLower.split(" ")[0].equals("exit")) {
@@ -282,7 +364,6 @@ public class View {
 				minimize = false;
 			}
 			System.out.println(""); // Extra whitespace
-			
 		} 
 	}
 	
@@ -302,12 +383,7 @@ public class View {
         }
         return numeric;
 	}
-	
-	public static void main(String[] args) throws FileNotFoundException{
-		/* This function starts the program. That's it. */
-		new View();
-	}
-	
+
 	private void printAdditionText(boolean added, boolean exists, String title, String artist) {
 		/* This function is used to print out if something
 		 * was added to the library, if it was already in
@@ -349,12 +425,15 @@ public class View {
 		// There's 2 ways of searching, so we need to account for it.
 		// indicator is often used as the way of "accounting" for these.
 		if (searching.equals("1")) indicator = "title";
-		else indicator = "artist";
+		else if (searching.equals("2")) indicator = "artist";
+		else indicator = "genre";
 		System.out.print("Please enter the " +  indicator + " of the song: ");
 		holdInput = getInput.nextLine();
 		System.out.println("");
-		// This will return anything that CONTAINS the given input, as it's boolean is false.
-		ArrayList<Song> resultList = myLibrary.searchByIndicatorSong(holdInput, locationHolder, indicator, false);
+		// Now more interesting: We need contains if it's name or artist, but equals if genre.
+		ArrayList<Song> resultList = new ArrayList<Song>();
+		if (indicator.equals("genre")) resultList = myLibrary.searchByIndicatorSong(holdInput, locationHolder, indicator, true);
+		else resultList = myLibrary.searchByIndicatorSong(holdInput, locationHolder, indicator, false);
 		if (resultList.size() == 0) {
 			System.out.println("Sorry " + holdInput + " is not in the " + locationHolder + ".");
 		} else {
@@ -364,6 +443,38 @@ public class View {
 				System.out.println((i+1) + ": " + resultList.get(i).getPrintFormatted());
 			}
 		}
+		// It appears we are not done.
+		System.out.println("Please enter the number of any song you want album information of.");
+		System.out.println("Alternatively, enter anything else to go back to the start.");
+		String getNum = getInput.nextLine();
+		if (isNumeric(getNum)) {
+			int indexPos = Integer.parseInt(getNum) - 1;
+			Song holdWant = resultList.get(indexPos);
+			ArrayList<Album> secondaryResultList = myLibrary.searchByIndicatorAlbum(holdWant.getAlbumName(), "musicstore", "title", true);
+			if (secondaryResultList.size() == 0) {
+				System.out.println("Sorry " + holdInput + " is not in the " + locationHolder + ".");
+			} else {
+				System.out.println("Search result: ");
+				// This double loop basically prints the album name, and then everything in the album,
+				// before moving onto the next one.
+				for(int i = 0; i < secondaryResultList.size(); i++) {
+					System.out.println("   ~ " + secondaryResultList.get(i).getPrintFormatted());
+					for(int j = 0; j < secondaryResultList.get(i).getSongList().size(); j++) {
+						System.out.println((j+1) + ": " + secondaryResultList.get(i).getSongList().get(j).getSongName());
+					}
+					System.out.println("");
+				}
+				if(myLibrary.checkAlbum(secondaryResultList.get(0).getAlbumName(), secondaryResultList.get(0).getArtist())) {
+					System.out.println("An album " + secondaryResultList.get(0).getAlbumName() + " is in library.");
+				} else {
+					System.out.println("An album " + secondaryResultList.get(0).getAlbumName() + " is not in library.");
+				}
+			}
+			
+		} else {
+			// This functions like minimize's role, so no reason to have it.
+			minimize = false;
+		}
 	}
 	
 	private void searchAlbum_Function(String searching, String locationHolder) {
@@ -371,7 +482,7 @@ public class View {
 		 * the library or musicstore. Does nearly everything by itself. */
 		String indicator = "";
 		// Indicator tells apart how it's searching, as like before.
-		if (searching.equals("3")) indicator = "title";
+		if (searching.equals("4")) indicator = "title";
 		else indicator = "artist";
 		System.out.print("Please enter the " +  indicator + " of the album: ");
 		holdInput = getInput.nextLine();
@@ -417,6 +528,29 @@ public class View {
 		}
 	}
 	
+	private void removeSong_Function(String title, String artist) {
+		/* Handles removing a song from the library.
+		 * ... That's it. */
+		if (myLibrary.canRemoveSong(title, artist)) {
+			myLibrary.removeSong(title, artist);
+			System.out.println("A song " + title + " by " + artist + " has been removed from library.");
+		} else {
+			System.out.println("A song " + title + " by " + artist + " is not found in the library");
+		}
+		
+	}
+	
+	private void removeAlbum_Function(String title, String artist) {
+		/* Handles removing an album from the library.
+		 * ... That's it. Note that this also removees related songs. */
+		if (myLibrary.canRemoveAlbum(title, artist)) {
+			myLibrary.removeAlbum(title, artist);
+			System.out.println("An album " + title + " by " + artist + " has been removed from library.");
+		}else {
+			System.out.println("An album " + title + " by " + artist + " is not found in the library");
+		}
+		
+	}
 	
 	private void addSong_Function(String title, String artist) {
 		/* Handles adding a song to the library.
@@ -439,13 +573,14 @@ public class View {
 					if (myLibrary.canAddSongToList(songs.get(i))) {
 						// And if we get here, then we're done.
 						myLibrary.addSongToList(songs.get(i));
-						added = true; // Why not set exists? Because added basically acts like it.
+						added = true; // Why not set exists? Because added basiadcally acts like it.
 						break;
 					} else {
 						exists = true;
 					}
 				}
 			}
+			// Printing the text happens after, since we need vars from above.
 			printAdditionText(added, exists, title, artist);
 		}
 	}
@@ -464,7 +599,7 @@ public class View {
 			for(int i = 0; i < albums.size(); i++) {
 				if(albums.get(i).getArtist().toLowerCase().equals(artist.toLowerCase())) {
 					// If we got here, then it certainly exists.
-					if(myLibrary.canAddAlbumToList(albums.get(i))) {
+					if(myLibrary.canAddAlbumToList(albums.get(i), albums.get(i).getSongList().size())) {
 						// And if we get here, then we're done.
 						myLibrary.addAlbumToList(albums.get(i));
 						added = true; // Why not set exists? Because added basically acts like it.
@@ -548,7 +683,7 @@ public class View {
 			}
 		}
 		// We don't need to know if it exists to try.
-		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);
+		removed = myLibrary.removeSongFromPlaylist(playListName, title, artist);	
 		if (exist) {
 			if (removed) System.out.println(title + " by " + artist + " has been removed from " + playListName);
 			else System.out.println(title + " by " + artist + " is not in " + playListName); // Else for it not being there
