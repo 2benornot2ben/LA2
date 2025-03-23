@@ -209,7 +209,7 @@ public class LibraryModel {
 					if(songList.get(j).getAlbumName().toLowerCase().equals(title.toLowerCase())) {
 						// First from all playlists...
 						for(int k = 0; k < playListList.size(); k++) {
-							removeSongFromPlaylist(playListList.get(k).getPlayListName(), songList.get(j).getSongName(), artist);
+							removeSongFromPlaylistSpecial(songList.get(j).getSongName(), artist);
 						}
 						// And then from itself.
 						Song songSave = songList.get(i);
